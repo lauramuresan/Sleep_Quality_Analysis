@@ -1,17 +1,10 @@
-import json
 import os
 import logging
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 class ReportGenerator:
-    """
-    Genereaza un dashboard HTML interactiv cu rezultatele comparative
-    ale modelelor KNN si Decision Tree.
-    """
-
     def __init__(self, results: dict):
         self.r = results
         self.tree = results['tree']
@@ -19,12 +12,7 @@ class ReportGenerator:
         self.comp = results['comparison']
         self.ds   = results['dataset']
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
-
     def _winner_badge(self, metric_key, model_key):
-        """Returns HTML badge if this model wins this metric."""
         if self.comp.get(metric_key) == model_key:
             return '<span class="badge-win">WINNER</span>'
         return ''
@@ -79,12 +67,8 @@ class ReportGenerator:
             </div>'''
         return f'<div class="fi-list">{items}</div>'
 
-    # ------------------------------------------------------------------
-    # Sections
-    # ------------------------------------------------------------------
-
     def _header_html(self):
-        now = datetime.now().strftime('%d %B %Y, %H:%M')
+        now = datetime.now().strftime('%B %d, %Y, %H:%M')
         tree_wins = sum(1 for v in self.comp.values() if v == 'tree')
         knn_wins  = sum(1 for v in self.comp.values() if v == 'knn')
         overall_winner = 'Decision Tree' if tree_wins >= knn_wins else 'KNN'
@@ -95,9 +79,9 @@ class ReportGenerator:
             <div class="hero-content">
                 <div class="hero-eyebrow">ML Model Analysis Report</div>
                 <h1 class="hero-title">KNN <span class="vs">vs</span> Decision Tree</h1>
-                <div class="hero-sub">Comparatie completa · Antrenat {self.ds["train_samples"]:,} samples · Testat {self.ds["test_samples"]:,} samples · {self.ds["n_features"]} features · {self.ds["n_classes"]} clase</div>
+                <div class="hero-sub">Complete Comparison · Trained on {self.ds["train_samples"]:,} samples · Tested on {self.ds["test_samples"]:,} samples · {self.ds["n_features"]} features · {self.ds["n_classes"]} classes</div>
                 <div class="hero-verdict">
-                    Castigator overall: <span style="color:{overall_color};font-weight:800">{overall_winner}</span>
+                    Overall Winner: <span style="color:{overall_color};font-weight:800">{overall_winner}</span>
                     <span class="score-chip tree-chip">{tree_wins}W</span><span class="vs-tiny"> vs </span><span class="score-chip knn-chip">{knn_wins}W</span>
                 </div>
                 <div class="hero-date">{now}</div>
@@ -137,12 +121,12 @@ class ReportGenerator:
             </tr>'''
         return f'''
         <section class="section">
-            <h2 class="section-title">📊 Metrici Comparative</h2>
+            <h2 class="section-title">📊 Comparative Metrics</h2>
             <div class="table-wrap">
                 <table class="score-table">
                     <thead>
                         <tr>
-                            <th>Metrica</th>
+                            <th>Metric</th>
                             <th class="tree-header">🌲 Decision Tree</th>
                             <th>Δ Delta</th>
                             <th class="knn-header">🔵 KNN</th>
@@ -158,7 +142,7 @@ class ReportGenerator:
         k_cm = self._cm_html(self.knn['confusion_matrix'],  self.knn['classes'],  'knn')
         return f'''
         <section class="section">
-            <h2 class="section-title">🔲 Matrice de Confuzie</h2>
+            <h2 class="section-title">🔲 Confusion Matrix</h2>
             <div class="two-col">
                 <div class="model-card tree-card">
                     <div class="model-card-header tree-header-bg">🌲 Decision Tree</div>
@@ -181,19 +165,19 @@ class ReportGenerator:
             k = k_classes.get(cls, {})
             rows += f'''
             <tr>
-                <td class="cls-label">Clasa {cls}</td>
+                <td class="cls-label">Class {cls}</td>
                 <td>{t.get("precision","—")}</td><td>{t.get("recall","—")}</td><td>{t.get("f1","—")}</td><td>{t.get("support","—")}</td>
                 <td class="sep"></td>
                 <td>{k.get("precision","—")}</td><td>{k.get("recall","—")}</td><td>{k.get("f1","—")}</td><td>{k.get("support","—")}</td>
             </tr>'''
         return f'''
         <section class="section">
-            <h2 class="section-title">📋 Performanta per Clasa</h2>
+            <h2 class="section-title">📋 Performance per Class</h2>
             <div class="table-wrap">
                 <table class="per-class-table">
                     <thead>
                         <tr>
-                            <th rowspan="2">Clasa</th>
+                            <th rowspan="2">Class</th>
                             <th colspan="4" class="tree-header">🌲 Decision Tree</th>
                             <th class="sep-header"></th>
                             <th colspan="4" class="knn-header">🔵 KNN</th>
@@ -221,10 +205,10 @@ class ReportGenerator:
                     {fi_html}
                 </div>
                 <div class="tree-info-box">
-                    <div class="info-stat"><span class="info-label">Adancime maxima utilizata</span><span class="info-number tree-color">{extras.get("max_depth_used","?")}</span></div>
-                    <div class="info-stat"><span class="info-label">Numar frunze</span><span class="info-number tree-color">{extras.get("n_leaves","?")}</span></div>
+                    <div class="info-stat"><span class="info-label">Max depth used</span><span class="info-number tree-color">{extras.get("max_depth_used","?")}</span></div>
+                    <div class="info-stat"><span class="info-label">Number of leaves</span><span class="info-number tree-color">{extras.get("n_leaves","?")}</span></div>
                     <div class="info-stat"><span class="info-label">Total features</span><span class="info-number">{extras.get("n_features_total","?")}</span></div>
-                    <div class="info-note">KNN nu ofera feature importance nativa — distanta dintre puncte influenteaza predictia uniform.</div>
+                    <div class="info-note">KNN does not offer native feature importance — the distance between points influences the prediction uniformly.</div>
                 </div>
             </div>
         </section>'''
@@ -233,10 +217,10 @@ class ReportGenerator:
         t_p = self._params_html(self.tree.get('best_params', {}))
         k_p = self._params_html(self.knn.get('best_params', {}))
         k_extras = self.knn.get('extras', {})
-        knn_note = f'<div class="knn-note">StandardScaler aplicat: <strong>{"DA" if k_extras.get("uses_scaler") else "NU"}</strong> — KNN este sensibil la scala datelor.</div>'
+        knn_note = f'<div class="knn-note">StandardScaler applied: <strong>{"YES" if k_extras.get("uses_scaler") else "NO"}</strong> — KNN is sensitive to data scale.</div>'
         return f'''
         <section class="section">
-            <h2 class="section-title">⚙️ Hiperparametri Optimi (GridSearch / RandomSearch)</h2>
+            <h2 class="section-title">⚙️ Optimal Hyperparameters (Search Results)</h2>
             <div class="two-col">
                 <div class="model-card tree-card">
                     <div class="model-card-header tree-header-bg">🌲 Decision Tree — Best Params</div>
@@ -251,51 +235,51 @@ class ReportGenerator:
 
     def _pros_cons_html(self):
         tree_pros = [
-            'Interpretabil — poti vedea regulile exacte (tree_logic.txt)',
-            'Feature importance nativa',
-            'Viteza de predictie foarte buna',
-            'Nu necesita normalizarea datelor',
-            'Bun cu variabile categorice si relatii neliniare',
+            'Interpretable — you can see the exact rules (tree_logic.txt)',
+            'Native feature importance',
+            'Very fast prediction speed',
+            'Does not require data normalization',
+            'Good with categorical variables and non-linear relationships',
         ]
         tree_cons = [
-            'Tendinta de overfit fara pruning adecvat',
-            'Instabil — schimbari mici in date = arbore diferit',
-            'Nu performeaza optim pe date cu multe clase rare',
+            'Tendency to overfit without proper pruning',
+            'Unstable — small changes in data = different tree',
+            'Does not perform optimally on data with many rare classes',
         ]
         knn_pros = [
-            'Simplu conceptual — nicio ipoteza despre distributie',
-            'Se adapteaza natural la granita de decizie complexa',
-            'Bun cand clasele sunt bine separate in spatiu',
-            'Fara antrenare explicita — lazy learner',
+            'Conceptually simple — no assumptions about distribution',
+            'Adapts naturally to complex decision boundaries',
+            'Good when classes are well separated in space',
+            'No explicit training phase — lazy learner',
         ]
         knn_cons = [
-            'Lent la predictie pe seturi mari (O(n) per query)',
-            'Necesita scalare obligatorie (StandardScaler inclus)',
-            'Sensibil la date cu zgomot si outlieri',
-            'Nicio interpretabilitate — black box',
-            'Consum mare de memorie (stocheaza toti vecinii)',
+            'Slow prediction on large datasets (O(n) per query)',
+            'Requires mandatory scaling (StandardScaler included)',
+            'Sensitive to noisy data and outliers',
+            'No interpretability — black box',
+            'High memory consumption (stores all neighbors)',
         ]
         def items(lst, cls):
             return ''.join(f'<li class="pros-cons-item {cls}">{x}</li>' for x in lst)
         return f'''
         <section class="section">
-            <h2 class="section-title">⚖️ Plusuri & Minusuri</h2>
+            <h2 class="section-title">⚖️ Pros & Cons</h2>
             <div class="two-col">
                 <div class="model-card tree-card">
                     <div class="model-card-header tree-header-bg">🌲 Decision Tree</div>
                     <div class="card-body">
-                        <h4 class="pros-title">✅ Plusuri</h4>
+                        <h4 class="pros-title">✅ Pros</h4>
                         <ul class="pros-cons-list">{items(tree_pros,"pro")}</ul>
-                        <h4 class="cons-title">❌ Minusuri</h4>
+                        <h4 class="cons-title">❌ Cons</h4>
                         <ul class="pros-cons-list">{items(tree_cons,"con")}</ul>
                     </div>
                 </div>
                 <div class="model-card knn-card">
                     <div class="model-card-header knn-header-bg">🔵 KNN</div>
                     <div class="card-body">
-                        <h4 class="pros-title">✅ Plusuri</h4>
+                        <h4 class="pros-title">✅ Pros</h4>
                         <ul class="pros-cons-list">{items(knn_pros,"pro")}</ul>
-                        <h4 class="cons-title">❌ Minusuri</h4>
+                        <h4 class="cons-title">❌ Cons</h4>
                         <ul class="pros-cons-list">{items(knn_cons,"con")}</ul>
                     </div>
                 </div>
@@ -310,20 +294,20 @@ class ReportGenerator:
             rec_model = 'Decision Tree'
             rec_color = 'var(--tree-color)'
             rec_icon  = '🌲'
-            rec_reason = f'Decision Tree obtine scor superior pe {tree_wins} din {len(self.comp)} metrici. Ofera si interpretabilitate nativa.'
+            rec_reason = f'Decision Tree scores higher on {tree_wins} out of {len(self.comp)} metrics. It also offers native interpretability.'
         else:
             rec_model = 'KNN'
             rec_color = 'var(--knn-color)'
             rec_icon  = '🔵'
-            rec_reason = f'KNN obtine scor superior pe {knn_wins} din {len(self.comp)} metrici.'
+            rec_reason = f'KNN scores higher on {knn_wins} out of {len(self.comp)} metrics.'
         overfit_warning = ''
         if abs(t['overfit_gap']) > 0.05:
-            overfit_warning += f'<div class="warning-box">⚠️ Decision Tree are un gap de overfit de <strong>{t["overfit_gap"]:.4f}</strong> — considera pruning mai agresiv (ccp_alpha, max_depth mai mic).</div>'
+            overfit_warning += f'<div class="warning-box">⚠️ Decision Tree has an overfit gap of <strong>{t["overfit_gap"]:.4f}</strong> — consider more aggressive pruning (ccp_alpha, lower max_depth).</div>'
         if abs(k['overfit_gap']) > 0.05:
-            overfit_warning += f'<div class="warning-box">⚠️ KNN are un gap de overfit de <strong>{k["overfit_gap"]:.4f}</strong> — incearca mai multi vecini (k mai mare).</div>'
+            overfit_warning += f'<div class="warning-box">⚠️ KNN has an overfit gap of <strong>{k["overfit_gap"]:.4f}</strong> — try more neighbors (higher k).</div>'
         return f'''
         <section class="section recommendation-section">
-            <h2 class="section-title">🏆 Recomandare Finala</h2>
+            <h2 class="section-title">🏆 Final Recommendation</h2>
             <div class="rec-box" style="border-color:{rec_color}">
                 <div class="rec-icon">{rec_icon}</div>
                 <div class="rec-content">
@@ -339,10 +323,6 @@ class ReportGenerator:
             </div>
             {overfit_warning}
         </section>'''
-
-    # ------------------------------------------------------------------
-    # CSS
-    # ------------------------------------------------------------------
 
     def _css(self):
         return '''
@@ -485,14 +465,9 @@ class ReportGenerator:
         .warning-box { margin-top:16px; padding:14px 18px; background:rgba(251,191,36,0.07); border:1px solid rgba(251,191,36,0.3); border-radius:8px; font-size:14px; color:#fbbf24; line-height:1.6; }
         '''
 
-    # ------------------------------------------------------------------
-    # Full HTML
-    # ------------------------------------------------------------------
-
     def generate_html(self):
-        data_json = json.dumps(self.r, indent=2)
         return f'''<!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -511,7 +486,6 @@ class ReportGenerator:
         {self._recommendation_html()}
     </div>
     <script>
-    // Animate bars on load
     window.addEventListener('load', () => {{
         document.querySelectorAll('.bar-fill, .fi-bar-fill').forEach((el, i) => {{
             const w = el.style.width;
@@ -528,5 +502,5 @@ class ReportGenerator:
         html = self.generate_html()
         with open(path, 'w', encoding='utf-8') as f:
             f.write(html)
-        logging.info(f"Dashboard salvat: {path}")
+        logging.info(f"Dashboard saved: {path}")
         return path
