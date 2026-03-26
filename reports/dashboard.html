@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Analysis — KNN vs Decision Tree</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161e;
+            --surface2: #1a1e2a;
+            --border: #252a38;
+            --text: #e8eaf0;
+            --muted: #6b7280;
+            --tree-color: #34d399;
+            --tree-bg: rgba(52,211,153,0.08);
+            --tree-border: rgba(52,211,153,0.25);
+            --knn-color: #60a5fa;
+            --knn-bg: rgba(96,165,250,0.08);
+            --knn-border: rgba(96,165,250,0.25);
+            --pos: #34d399;
+            --neg: #f87171;
+            --neutral: #6b7280;
+            --font-display: 'Syne', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        body { background:var(--bg); color:var(--text); font-family:var(--font-display); min-height:100vh; }
+        .container { max-width:1200px; margin:0 auto; padding:0 24px 80px; }
+
+        /* HERO */
+        .hero { position:relative; padding:80px 0 60px; text-align:center; overflow:hidden; margin-bottom:16px; }
+        .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(52,211,153,0.08) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(96,165,250,0.06) 0%, transparent 60%); pointer-events:none; }
+        .hero-content { position:relative; }
+        .hero-eyebrow { font-size:11px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
+        .hero-title { font-size:clamp(40px,7vw,80px); font-weight:800; line-height:1; letter-spacing:-0.03em; color:var(--text); margin-bottom:20px; }
+        .vs { color:var(--muted); font-weight:400; }
+        .hero-sub { font-size:14px; color:var(--muted); margin-bottom:24px; font-family:var(--font-mono); }
+        .hero-verdict { font-size:18px; font-weight:600; margin-bottom:12px; }
+        .hero-date { font-size:12px; color:var(--muted); font-family:var(--font-mono); }
+        .score-chip { display:inline-block; padding:2px 10px; border-radius:20px; font-size:13px; font-weight:700; margin:0 3px; }
+        .tree-chip { background:var(--tree-bg); color:var(--tree-color); border:1px solid var(--tree-border); }
+        .knn-chip  { background:var(--knn-bg);  color:var(--knn-color);  border:1px solid var(--knn-border); }
+        .vs-tiny { color:var(--muted); font-size:12px; }
+
+        /* SECTIONS */
+        .section { margin-bottom:48px; }
+        .section-title { font-size:20px; font-weight:700; margin-bottom:24px; letter-spacing:-0.02em; display:flex; align-items:center; gap:10px; }
+        .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        /* TWO COL */
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        @media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+
+        /* MODEL CARDS */
+        .model-card { border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--surface); }
+        .tree-card { border-color:var(--tree-border); }
+        .knn-card  { border-color:var(--knn-border); }
+        .model-card-header { padding:12px 20px; font-size:14px; font-weight:700; letter-spacing:0.05em; }
+        .tree-header-bg { background:var(--tree-bg); color:var(--tree-color); border-bottom:1px solid var(--tree-border); }
+        .knn-header-bg  { background:var(--knn-bg);  color:var(--knn-color);  border-bottom:1px solid var(--knn-border); }
+        .card-body { padding:20px; }
+
+        /* SCORE TABLE */
+        .table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
+        .score-table { width:100%; border-collapse:collapse; font-size:14px; }
+        .score-table thead tr { background:var(--surface2); }
+        .score-table th { padding:12px 16px; text-align:left; font-weight:700; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+        .score-table td { padding:10px 16px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .score-table tr:last-child td { border-bottom:none; }
+        .score-table tr:hover td { background:var(--surface2); }
+        .tree-header { color:var(--tree-color) !important; }
+        .knn-header  { color:var(--knn-color) !important; }
+        .metric-label { font-weight:600; color:var(--text); white-space:nowrap; }
+        .metric-val { font-family:var(--font-mono); font-size:13px; }
+        .tree-val { color:var(--tree-color); }
+        .knn-val  { color:var(--knn-color); }
+        .metric-delta { text-align:center; }
+        .delta { font-family:var(--font-mono); font-size:12px; font-weight:600; padding:2px 6px; border-radius:4px; }
+        .delta.pos { color:var(--pos); background:rgba(52,211,153,0.1); }
+        .delta.neg { color:var(--neg); background:rgba(248,113,113,0.1); }
+        .delta.neutral { color:var(--neutral); }
+        .badge-win { background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; font-size:9px; font-weight:800; padding:2px 6px; border-radius:3px; letter-spacing:0.08em; margin-left:6px; vertical-align:middle; }
+        .bar-track { height:4px; background:var(--border); border-radius:2px; margin-top:5px; width:100%; min-width:80px; }
+        .bar-fill  { height:4px; border-radius:2px; transition:width 0.3s; }
+
+        /* CONFUSION MATRIX */
+        .cm-table { border-collapse:collapse; font-family:var(--font-mono); font-size:13px; }
+        .cm-header { padding:6px 12px; font-size:11px; color:var(--muted); font-weight:600; text-align:center; }
+        .cm-label  { padding:6px 12px; font-size:11px; color:var(--muted); font-weight:600; }
+        .cm-cell   { padding:10px 16px; text-align:center; background:var(--surface2); border:1px solid var(--border); }
+        .cm-diag   { padding:10px 16px; text-align:center; background:var(--cm-accent,var(--tree-color)); color:#000; font-weight:700; border:1px solid var(--border); }
+
+        /* PER CLASS TABLE */
+        .per-class-table { width:100%; border-collapse:collapse; font-size:13px; }
+        .per-class-table th { padding:10px 12px; text-align:center; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); background:var(--surface2); }
+        .per-class-table td { padding:9px 12px; text-align:center; border-bottom:1px solid var(--border); font-family:var(--font-mono); }
+        .per-class-table tr:last-child td { border-bottom:none; }
+        .cls-label { font-weight:700; color:var(--text); font-family:var(--font-display); }
+        .sep, .sep-header { width:12px; background:var(--border); }
+
+        /* FEATURE IMPORTANCE */
+        .fi-container { display:flex; flex-direction:column; gap:0; }
+        .fi-list { display:flex; flex-direction:column; gap:8px; }
+        .fi-row { display:grid; grid-template-columns:28px 1fr 120px 70px; align-items:center; gap:10px; }
+        .fi-rank { font-family:var(--font-mono); font-size:11px; color:var(--muted); text-align:right; }
+        .fi-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .fi-bar-track { height:6px; background:var(--border); border-radius:3px; }
+        .fi-bar-fill  { height:6px; border-radius:3px; background:linear-gradient(90deg,var(--tree-color),#059669); }
+        .fi-val { font-family:var(--font-mono); font-size:11px; color:var(--muted); text-align:right; }
+        .tree-info-box { background:var(--surface2); border-radius:10px; padding:20px; border:1px solid var(--tree-border); display:flex; flex-direction:column; gap:16px; }
+        .info-stat { display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid var(--border); }
+        .info-stat:last-of-type { border-bottom:none; }
+        .info-label { font-size:13px; color:var(--muted); }
+        .info-number { font-family:var(--font-mono); font-size:24px; font-weight:700; }
+        .tree-color { color:var(--tree-color); }
+        .info-note { font-size:12px; color:var(--muted); line-height:1.6; padding-top:4px; }
+
+        /* PARAMS */
+        .params-grid { display:flex; flex-direction:column; gap:8px; }
+        .param-item { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--surface2); border-radius:6px; border:1px solid var(--border); }
+        .param-key { font-family:var(--font-mono); font-size:12px; color:var(--muted); }
+        .param-val { font-family:var(--font-mono); font-size:13px; font-weight:600; color:var(--text); }
+        .knn-note  { margin-top:16px; padding:12px; background:var(--knn-bg); border:1px solid var(--knn-border); border-radius:8px; font-size:13px; color:var(--knn-color); }
+
+        /* PROS CONS */
+        .pros-title, .cons-title { font-size:14px; font-weight:700; margin-bottom:10px; margin-top:16px; }
+        .pros-title { color:var(--pos); }
+        .cons-title { color:var(--neg); }
+        .pros-cons-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+        .pros-cons-item { font-size:13px; padding:8px 12px; border-radius:6px; line-height:1.5; }
+        .pro { background:rgba(52,211,153,0.06); border-left:3px solid var(--tree-color); color:var(--text); }
+        .con { background:rgba(248,113,113,0.06); border-left:3px solid var(--neg); color:var(--text); }
+
+        /* RECOMMENDATION */
+        .rec-box { display:flex; gap:24px; align-items:flex-start; padding:28px; background:var(--surface2); border-radius:14px; border-width:2px; border-style:solid; }
+        .rec-icon { font-size:48px; line-height:1; flex-shrink:0; }
+        .rec-content { flex:1; }
+        .rec-model { font-size:28px; font-weight:800; letter-spacing:-0.02em; margin-bottom:8px; }
+        .rec-reason { font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+        .rec-scores { display:flex; flex-wrap:wrap; gap:8px; }
+        .score-pill { padding:4px 12px; border-radius:20px; font-family:var(--font-mono); font-size:12px; font-weight:600; }
+        .warning-box { margin-top:16px; padding:14px 18px; background:rgba(251,191,36,0.07); border:1px solid rgba(251,191,36,0.3); border-radius:8px; font-size:14px; color:#fbbf24; line-height:1.6; }
+        </style>
+</head>
+<body>
+    
+        <header class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <div class="hero-eyebrow">ML Model Analysis Report</div>
+                <h1 class="hero-title">KNN <span class="vs">vs</span> Decision Tree</h1>
+                <div class="hero-sub">Complete Comparison · Trained on 800 samples · Tested on 200 samples · 74 features · 5 classes</div>
+                <div class="hero-verdict">
+                    Overall Winner: <span style="color:var(--tree-color);font-weight:800">Decision Tree</span>
+                    <span class="score-chip tree-chip">4W</span><span class="vs-tiny"> vs </span><span class="score-chip knn-chip">0W</span>
+                </div>
+                <div class="hero-date">March 26, 2026, 22:47</div>
+            </div>
+        </header>
+    <div class="container">
+        
+        <section class="section">
+            <h2 class="section-title">📊 Comparative Metrics</h2>
+            <div class="table-wrap">
+                <table class="score-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th class="tree-header">🌲 Decision Tree</th>
+                            <th>Δ Delta</th>
+                            <th class="knn-header">🔵 KNN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            <tr>
+                <td class="metric-label">Accuracy (Test)</td>
+                <td class="metric-val tree-val">0.41 <span class="badge-win">WINNER</span><div class="bar-track"><div class="bar-fill" style="width:41.0%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta pos">+0.0550</span></td>
+                <td class="metric-val knn-val">0.355 <div class="bar-track"><div class="bar-fill" style="width:35.5%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">F1 Score (Macro)</td>
+                <td class="metric-val tree-val">0.3245 <span class="badge-win">WINNER</span><div class="bar-track"><div class="bar-fill" style="width:32.5%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta pos">+0.0450</span></td>
+                <td class="metric-val knn-val">0.2795 <div class="bar-track"><div class="bar-fill" style="width:28.0%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">Precision (Macro)</td>
+                <td class="metric-val tree-val">0.3319 <div class="bar-track"><div class="bar-fill" style="width:33.2%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta pos">+0.0432</span></td>
+                <td class="metric-val knn-val">0.2887 <div class="bar-track"><div class="bar-fill" style="width:28.9%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">Recall (Macro)</td>
+                <td class="metric-val tree-val">0.3254 <div class="bar-track"><div class="bar-fill" style="width:32.5%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta pos">+0.0445</span></td>
+                <td class="metric-val knn-val">0.2809 <div class="bar-track"><div class="bar-fill" style="width:28.1%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">AUC-ROC</td>
+                <td class="metric-val tree-val">0 <div class="bar-track"><div class="bar-fill" style="width:0.0%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta neutral">0.0000</span></td>
+                <td class="metric-val knn-val">0 <div class="bar-track"><div class="bar-fill" style="width:0.0%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">Predict Time (ms)</td>
+                <td class="metric-val tree-val">0.348 <span class="badge-win">WINNER</span><div class="bar-track"><div class="bar-fill" style="width:1.4%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta pos">-24.2170</span></td>
+                <td class="metric-val knn-val">24.565 <div class="bar-track"><div class="bar-fill" style="width:100.0%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">Train Accuracy</td>
+                <td class="metric-val tree-val">0.4725 <div class="bar-track"><div class="bar-fill" style="width:47.2%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta neg">-0.5275</span></td>
+                <td class="metric-val knn-val">1.0 <div class="bar-track"><div class="bar-fill" style="width:100.0%;background:var(--knn-color)"></div></div></td>
+            </tr>
+            <tr>
+                <td class="metric-label">Overfit Gap</td>
+                <td class="metric-val tree-val">0.0625 <span class="badge-win">WINNER</span><div class="bar-track"><div class="bar-fill" style="width:9.7%;background:var(--tree-color)"></div></div></td>
+                <td class="metric-delta"><span class="delta pos">-0.5825</span></td>
+                <td class="metric-val knn-val">0.645 <div class="bar-track"><div class="bar-fill" style="width:100.0%;background:var(--knn-color)"></div></div></td>
+            </tr></tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">📋 Performance per Class</h2>
+            <div class="table-wrap">
+                <table class="per-class-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Class</th>
+                            <th colspan="4" class="tree-header">🌲 Decision Tree</th>
+                            <th class="sep-header"></th>
+                            <th colspan="4" class="knn-header">🔵 KNN</th>
+                        </tr>
+                        <tr>
+                            <th>Prec.</th><th>Recall</th><th>F1</th><th>Support</th>
+                            <th class="sep-header"></th>
+                            <th>Prec.</th><th>Recall</th><th>F1</th><th>Support</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            <tr>
+                <td class="cls-label">Class 0</td>
+                <td>0.4462</td><td>0.4915</td><td>0.4677</td><td>59</td>
+                <td class="sep"></td>
+                <td>0.358</td><td>0.4915</td><td>0.4143</td><td>59</td>
+            </tr>
+            <tr>
+                <td class="cls-label">Class 1</td>
+                <td>0.5484</td><td>0.4048</td><td>0.4658</td><td>42</td>
+                <td class="sep"></td>
+                <td>0.4667</td><td>0.3333</td><td>0.3889</td><td>42</td>
+            </tr>
+            <tr>
+                <td class="cls-label">Class 2</td>
+                <td>0.0</td><td>0.0</td><td>0.0</td><td>7</td>
+                <td class="sep"></td>
+                <td>0.0</td><td>0.0</td><td>0.0</td><td>7</td>
+            </tr>
+            <tr>
+                <td class="cls-label">Class 3</td>
+                <td>0.3649</td><td>0.4737</td><td>0.4122</td><td>57</td>
+                <td class="sep"></td>
+                <td>0.3226</td><td>0.3509</td><td>0.3361</td><td>57</td>
+            </tr>
+            <tr>
+                <td class="cls-label">Class 4</td>
+                <td>0.3</td><td>0.2571</td><td>0.2769</td><td>35</td>
+                <td class="sep"></td>
+                <td>0.2963</td><td>0.2286</td><td>0.2581</td><td>35</td>
+            </tr></tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">🔲 Confusion Matrix</h2>
+            <div class="two-col">
+                <div class="model-card tree-card">
+                    <div class="model-card-header tree-header-bg">🌲 Decision Tree</div>
+                    <div class="card-body">
+        <table class="cm-table" style="--cm-accent:var(--tree-color)">
+            <thead><tr><th></th><th class="cm-header">P:0</th><th class="cm-header">P:1</th><th class="cm-header">P:2</th><th class="cm-header">P:3</th><th class="cm-header">P:4</th></tr></thead>
+            <tbody><tr><td class="cm-label">0</td><td class="cm-diag">29</td><td class="cm-cell">12</td><td class="cm-cell">0</td><td class="cm-cell">14</td><td class="cm-cell">4</td></tr><tr><td class="cm-label">1</td><td class="cm-cell">17</td><td class="cm-diag">17</td><td class="cm-cell">0</td><td class="cm-cell">7</td><td class="cm-cell">1</td></tr><tr><td class="cm-label">2</td><td class="cm-cell">0</td><td class="cm-cell">0</td><td class="cm-diag">0</td><td class="cm-cell">5</td><td class="cm-cell">2</td></tr><tr><td class="cm-label">3</td><td class="cm-cell">15</td><td class="cm-cell">1</td><td class="cm-cell">0</td><td class="cm-diag">27</td><td class="cm-cell">14</td></tr><tr><td class="cm-label">4</td><td class="cm-cell">4</td><td class="cm-cell">1</td><td class="cm-cell">0</td><td class="cm-cell">21</td><td class="cm-diag">9</td></tr></tbody>
+        </table></div>
+                </div>
+                <div class="model-card knn-card">
+                    <div class="model-card-header knn-header-bg">🔵 KNN</div>
+                    <div class="card-body">
+        <table class="cm-table" style="--cm-accent:var(--knn-color)">
+            <thead><tr><th></th><th class="cm-header">P:0</th><th class="cm-header">P:1</th><th class="cm-header">P:2</th><th class="cm-header">P:3</th><th class="cm-header">P:4</th></tr></thead>
+            <tbody><tr><td class="cm-label">0</td><td class="cm-diag">29</td><td class="cm-cell">10</td><td class="cm-cell">0</td><td class="cm-cell">12</td><td class="cm-cell">8</td></tr><tr><td class="cm-label">1</td><td class="cm-cell">20</td><td class="cm-diag">14</td><td class="cm-cell">0</td><td class="cm-cell">6</td><td class="cm-cell">2</td></tr><tr><td class="cm-label">2</td><td class="cm-cell">1</td><td class="cm-cell">1</td><td class="cm-diag">0</td><td class="cm-cell">5</td><td class="cm-cell">0</td></tr><tr><td class="cm-label">3</td><td class="cm-cell">23</td><td class="cm-cell">5</td><td class="cm-cell">0</td><td class="cm-diag">20</td><td class="cm-cell">9</td></tr><tr><td class="cm-label">4</td><td class="cm-cell">8</td><td class="cm-cell">0</td><td class="cm-cell">0</td><td class="cm-cell">19</td><td class="cm-diag">8</td></tr></tbody>
+        </table></div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">🎯 Feature Importance (Decision Tree)</h2>
+            <div class="two-col">
+                <div class="fi-container">
+                    <div class="fi-list">
+            <div class="fi-row">
+                <span class="fi-rank">#1</span>
+                <span class="fi-name">daily_gaming_hours</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:100.0%"></div></div>
+                <span class="fi-val">0.55669</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#2</span>
+                <span class="fi-name">sleep_hours</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:38.2%"></div></div>
+                <span class="fi-val">0.21247</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#3</span>
+                <span class="fi-name">face_to_face_social_hours_weekly</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:24.5%"></div></div>
+                <span class="fi-val">0.13645</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#4</span>
+                <span class="fi-name">gaming_platform_Mobile</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:8.9%"></div></div>
+                <span class="fi-val">0.04944</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#5</span>
+                <span class="fi-name">primary_game_Final Fantasy XIV</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:8.1%"></div></div>
+                <span class="fi-val">0.04495</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#6</span>
+                <span class="fi-name">primary_game_Elden Ring</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:0.0%"></div></div>
+                <span class="fi-val">0.00000</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#7</span>
+                <span class="fi-name">primary_game_Call of Duty</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:0.0%"></div></div>
+                <span class="fi-val">0.00000</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#8</span>
+                <span class="fi-name">primary_game_Candy Crush</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:0.0%"></div></div>
+                <span class="fi-val">0.00000</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#9</span>
+                <span class="fi-name">primary_game_Civilization VI</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:0.0%"></div></div>
+                <span class="fi-val">0.00000</span>
+            </div>
+            <div class="fi-row">
+                <span class="fi-rank">#10</span>
+                <span class="fi-name">primary_game_Clash of Clans</span>
+                <div class="fi-bar-track"><div class="fi-bar-fill" style="width:0.0%"></div></div>
+                <span class="fi-val">0.00000</span>
+            </div></div>
+                </div>
+                <div class="tree-info-box">
+                    <div class="info-stat"><span class="info-label">Max depth used</span><span class="info-number tree-color">3</span></div>
+                    <div class="info-stat"><span class="info-label">Number of leaves</span><span class="info-number tree-color">8</span></div>
+                    <div class="info-stat"><span class="info-label">Total features</span><span class="info-number">74</span></div>
+                    <div class="info-note">KNN does not offer native feature importance — the distance between points influences the prediction uniformly.</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">⚙️ Optimal Hyperparameters (Search Results)</h2>
+            <div class="two-col">
+                <div class="model-card tree-card">
+                    <div class="model-card-header tree-header-bg">🌲 Decision Tree — Best Params</div>
+                    <div class="card-body"><div class="params-grid"><div class="param-item"><span class="param-key">class_weight</span><span class="param-val">None</span></div><div class="param-item"><span class="param-key">criterion</span><span class="param-val">gini</span></div><div class="param-item"><span class="param-key">max_depth</span><span class="param-val">3</span></div><div class="param-item"><span class="param-key">max_features</span><span class="param-val">None</span></div><div class="param-item"><span class="param-key">min_samples_leaf</span><span class="param-val">1</span></div><div class="param-item"><span class="param-key">min_samples_split</span><span class="param-val">2</span></div></div></div>
+                </div>
+                <div class="model-card knn-card">
+                    <div class="model-card-header knn-header-bg">🔵 KNN — Best Params</div>
+                    <div class="card-body"><div class="params-grid"><div class="param-item"><span class="param-key">knn__weights</span><span class="param-val">distance</span></div><div class="param-item"><span class="param-key">knn__p</span><span class="param-val">1</span></div><div class="param-item"><span class="param-key">knn__n_neighbors</span><span class="param-val">15</span></div><div class="param-item"><span class="param-key">knn__metric</span><span class="param-val">minkowski</span></div></div><div class="knn-note">StandardScaler applied: <strong>YES</strong> — KNN is sensitive to data scale.</div></div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">⚖️ Pros & Cons</h2>
+            <div class="two-col">
+                <div class="model-card tree-card">
+                    <div class="model-card-header tree-header-bg">🌲 Decision Tree</div>
+                    <div class="card-body">
+                        <h4 class="pros-title">✅ Pros</h4>
+                        <ul class="pros-cons-list"><li class="pros-cons-item pro">Interpretable — you can see the exact rules (tree_logic.txt)</li><li class="pros-cons-item pro">Native feature importance</li><li class="pros-cons-item pro">Very fast prediction speed</li><li class="pros-cons-item pro">Does not require data normalization</li><li class="pros-cons-item pro">Good with categorical variables and non-linear relationships</li></ul>
+                        <h4 class="cons-title">❌ Cons</h4>
+                        <ul class="pros-cons-list"><li class="pros-cons-item con">Tendency to overfit without proper pruning</li><li class="pros-cons-item con">Unstable — small changes in data = different tree</li><li class="pros-cons-item con">Does not perform optimally on data with many rare classes</li></ul>
+                    </div>
+                </div>
+                <div class="model-card knn-card">
+                    <div class="model-card-header knn-header-bg">🔵 KNN</div>
+                    <div class="card-body">
+                        <h4 class="pros-title">✅ Pros</h4>
+                        <ul class="pros-cons-list"><li class="pros-cons-item pro">Conceptually simple — no assumptions about distribution</li><li class="pros-cons-item pro">Adapts naturally to complex decision boundaries</li><li class="pros-cons-item pro">Good when classes are well separated in space</li><li class="pros-cons-item pro">No explicit training phase — lazy learner</li></ul>
+                        <h4 class="cons-title">❌ Cons</h4>
+                        <ul class="pros-cons-list"><li class="pros-cons-item con">Slow prediction on large datasets (O(n) per query)</li><li class="pros-cons-item con">Requires mandatory scaling (StandardScaler included)</li><li class="pros-cons-item con">Sensitive to noisy data and outliers</li><li class="pros-cons-item con">No interpretability — black box</li><li class="pros-cons-item con">High memory consumption (stores all neighbors)</li></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section recommendation-section">
+            <h2 class="section-title">🏆 Final Recommendation</h2>
+            <div class="rec-box" style="border-color:var(--tree-color)">
+                <div class="rec-icon">🌲</div>
+                <div class="rec-content">
+                    <div class="rec-model" style="color:var(--tree-color)">Decision Tree</div>
+                    <div class="rec-reason">Decision Tree scores higher on 4 out of 4 metrics. It also offers native interpretability.</div>
+                    <div class="rec-scores">
+                        <span class="score-pill" style="background:var(--tree-bg);color:var(--tree-color)">Tree Acc: 0.41</span>
+                        <span class="score-pill" style="background:var(--knn-bg);color:var(--knn-color)">KNN Acc: 0.355</span>
+                        <span class="score-pill" style="background:var(--tree-bg);color:var(--tree-color)">Tree F1: 0.3245</span>
+                        <span class="score-pill" style="background:var(--knn-bg);color:var(--knn-color)">KNN F1: 0.2795</span>
+                    </div>
+                </div>
+            </div>
+            <div class="warning-box">⚠️ Decision Tree has an overfit gap of <strong>0.0625</strong> — consider more aggressive pruning (ccp_alpha, lower max_depth).</div><div class="warning-box">⚠️ KNN has an overfit gap of <strong>0.6450</strong> — try more neighbors (higher k).</div>
+        </section>
+    </div>
+    <script>
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.bar-fill, .fi-bar-fill').forEach((el, i) => {
+            const w = el.style.width;
+            el.style.width = '0';
+            setTimeout(() => { el.style.width = w; }, 100 + i * 30);
+        });
+    });
+    </script>
+</body>
+</html>

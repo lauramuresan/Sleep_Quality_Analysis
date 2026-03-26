@@ -1,0 +1,256 @@
+{
+  "tree": {
+    "model_name": "Decision Tree",
+    "accuracy_train": 0.4725,
+    "accuracy_test": 0.41,
+    "overfit_gap": 0.0625,
+    "precision_macro": 0.3319,
+    "recall_macro": 0.3254,
+    "f1_macro": 0.3245,
+    "auc_roc": null,
+    "predict_time_ms": 0.348,
+    "confusion_matrix": [
+      [
+        29,
+        12,
+        0,
+        14,
+        4
+      ],
+      [
+        17,
+        17,
+        0,
+        7,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        5,
+        2
+      ],
+      [
+        15,
+        1,
+        0,
+        27,
+        14
+      ],
+      [
+        4,
+        1,
+        0,
+        21,
+        9
+      ]
+    ],
+    "per_class": {
+      "0": {
+        "precision": 0.4462,
+        "recall": 0.4915,
+        "f1": 0.4677,
+        "support": 59
+      },
+      "1": {
+        "precision": 0.5484,
+        "recall": 0.4048,
+        "f1": 0.4658,
+        "support": 42
+      },
+      "2": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7
+      },
+      "3": {
+        "precision": 0.3649,
+        "recall": 0.4737,
+        "f1": 0.4122,
+        "support": 57
+      },
+      "4": {
+        "precision": 0.3,
+        "recall": 0.2571,
+        "f1": 0.2769,
+        "support": 35
+      }
+    },
+    "classes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "extras": {
+      "max_depth_used": 3,
+      "n_leaves": 8,
+      "n_features_total": 74,
+      "top_features": [
+        {
+          "feature": "daily_gaming_hours",
+          "importance": 0.55669
+        },
+        {
+          "feature": "sleep_hours",
+          "importance": 0.21247
+        },
+        {
+          "feature": "face_to_face_social_hours_weekly",
+          "importance": 0.13645
+        },
+        {
+          "feature": "gaming_platform_Mobile",
+          "importance": 0.04944
+        },
+        {
+          "feature": "primary_game_Final Fantasy XIV",
+          "importance": 0.04495
+        },
+        {
+          "feature": "primary_game_Elden Ring",
+          "importance": 0.0
+        },
+        {
+          "feature": "primary_game_Call of Duty",
+          "importance": 0.0
+        },
+        {
+          "feature": "primary_game_Candy Crush",
+          "importance": 0.0
+        },
+        {
+          "feature": "primary_game_Civilization VI",
+          "importance": 0.0
+        },
+        {
+          "feature": "primary_game_Clash of Clans",
+          "importance": 0.0
+        }
+      ]
+    },
+    "best_params": {
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": 3,
+      "max_features": null,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2
+    }
+  },
+  "knn": {
+    "model_name": "KNN",
+    "accuracy_train": 1.0,
+    "accuracy_test": 0.355,
+    "overfit_gap": 0.645,
+    "precision_macro": 0.2887,
+    "recall_macro": 0.2809,
+    "f1_macro": 0.2795,
+    "auc_roc": null,
+    "predict_time_ms": 24.565,
+    "confusion_matrix": [
+      [
+        29,
+        10,
+        0,
+        12,
+        8
+      ],
+      [
+        20,
+        14,
+        0,
+        6,
+        2
+      ],
+      [
+        1,
+        1,
+        0,
+        5,
+        0
+      ],
+      [
+        23,
+        5,
+        0,
+        20,
+        9
+      ],
+      [
+        8,
+        0,
+        0,
+        19,
+        8
+      ]
+    ],
+    "per_class": {
+      "0": {
+        "precision": 0.358,
+        "recall": 0.4915,
+        "f1": 0.4143,
+        "support": 59
+      },
+      "1": {
+        "precision": 0.4667,
+        "recall": 0.3333,
+        "f1": 0.3889,
+        "support": 42
+      },
+      "2": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7
+      },
+      "3": {
+        "precision": 0.3226,
+        "recall": 0.3509,
+        "f1": 0.3361,
+        "support": 57
+      },
+      "4": {
+        "precision": 0.2963,
+        "recall": 0.2286,
+        "f1": 0.2581,
+        "support": 35
+      }
+    },
+    "classes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "extras": {
+      "n_neighbors": 15,
+      "weights": "distance",
+      "metric": "minkowski",
+      "p": 1,
+      "uses_scaler": true
+    },
+    "best_params": {
+      "knn__weights": "distance",
+      "knn__p": 1,
+      "knn__n_neighbors": 15,
+      "knn__metric": "minkowski"
+    }
+  },
+  "comparison": {
+    "accuracy": "tree",
+    "f1": "tree",
+    "speed": "tree",
+    "overfit": "tree"
+  },
+  "dataset": {
+    "train_samples": 800,
+    "test_samples": 200,
+    "n_features": 74,
+    "n_classes": 5
+  }
+}

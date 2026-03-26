@@ -15,32 +15,23 @@ logging.basicConfig(
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Analiza comparativa KNN vs Decision Tree'
-    )
-    parser.add_argument(
-        '--data', type=str, default='data_output/',
-        help='Folder cu datele .npy si feature_names.joblib (default: data_output/)'
-    )
-    parser.add_argument(
-        '--models', type=str, default='results/models/',
-        help='Folder cu modelele .joblib antrenate (default: results/models/)'
-    )
-    parser.add_argument(
-        '--out', type=str, default='results/',
-        help='Folder output pentru dashboard si JSON (default: results/)'
-    )
-    parser.add_argument(
-        '--no-browser', action='store_true',
-        help='Nu deschide browserul automat dupa generare'
-    )
+    ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+    parser = argparse.ArgumentParser(description='Analiza comparativa KNN vs Decision Tree')
+
+    # Rutele standard bazate pe structura ta
+    parser.add_argument('--data', type=str, default=os.path.join(ROOT_DIR, 'data', 'processed'),
+                        help='Folder date procesate')
+    parser.add_argument('--models', type=str, default=os.path.join(ROOT_DIR, 'Models', 'saved_models'),
+                        help='Folder modele antrenate')
+    parser.add_argument('--out', type=str, default=os.path.join(ROOT_DIR, 'reports'), help='Folder output rapoarte')
+    parser.add_argument('--no-browser', action='store_true', help='Nu deschide browserul')
+
     return parser.parse_args()
 
 
 def check_required_files(data_folder, models_folder):
-    """Verifica daca toate fisierele necesare exista."""
     required = {
-        data_folder:   ['X_train.npy', 'y_train.npy', 'X_test.npy', 'y_test.npy', 'feature_names.joblib'],
+        data_folder: ['X_train.npy', 'y_train.npy', 'X_test.npy', 'y_test.npy', 'feature_names.joblib'],
         models_folder: ['tree_model.joblib', 'knn_pipeline.joblib', 'tree_best_params.joblib', 'knn_best_params.joblib']
     }
     missing = []
@@ -53,98 +44,66 @@ def check_required_files(data_folder, models_folder):
 
 
 def print_summary(results):
-    """Afiseaza un rezumat compact in terminal."""
-    t = results['tree']
-    k = results['knn']
-    comp = results['comparison']
-    ds = results['dataset']
-
+    t, k, comp, ds = results['tree'], results['knn'], results['comparison'], results['dataset']
     sep = '─' * 56
-    print(f'\n{sep}')
-    print(f'  📊  REZUMAT COMPARATIV — KNN vs Decision Tree')
-    print(sep)
-    print(f'  Dataset: {ds["train_samples"]:,} train / {ds["test_samples"]:,} test / {ds["n_features"]} features / {ds["n_classes"]} clase')
-    print(sep)
-    print(f'  {"Metrica":<25} {"Decision Tree":>14}  {"KNN":>10}')
-    print(f'  {"-"*25} {"-"*14}  {"-"*10}')
+    print(f'\n{sep}\n  📊  REZUMAT COMPARATIV — KNN vs Decision Tree\n{sep}')
+    print(
+        f'  Dataset: {ds["train_samples"]:,} train / {ds["test_samples"]:,} test / {ds["n_features"]} features / {ds["n_classes"]} clase\n{sep}')
+    print(f'  {"Metrica":<25} {"Decision Tree":>14}  {"KNN":>10}\n  {"-" * 25} {"-" * 14}  {"-" * 10}')
 
     rows = [
-        ('Accuracy (Test)',   t['accuracy_test'],  k['accuracy_test']),
-        ('F1 Macro',          t['f1_macro'],        k['f1_macro']),
-        ('Precision Macro',   t['precision_macro'], k['precision_macro']),
-        ('Recall Macro',      t['recall_macro'],    k['recall_macro']),
-        ('AUC-ROC',           t.get('auc_roc') or '-', k.get('auc_roc') or '-'),
-        ('Train Accuracy',    t['accuracy_train'],  k['accuracy_train']),
-        ('Overfit Gap',       t['overfit_gap'],     k['overfit_gap']),
+        ('Accuracy (Test)', t['accuracy_test'], k['accuracy_test']),
+        ('F1 Macro', t['f1_macro'], k['f1_macro']),
+        ('Precision Macro', t['precision_macro'], k['precision_macro']),
+        ('Recall Macro', t['recall_macro'], k['recall_macro']),
+        ('Train Accuracy', t['accuracy_train'], k['accuracy_train']),
+        ('Overfit Gap', t['overfit_gap'], k['overfit_gap']),
         ('Predict Time (ms)', t['predict_time_ms'], k['predict_time_ms']),
     ]
 
     for label, tv, kv in rows:
         try:
-            tf = float(tv)
-            kf = float(kv)
+            tf, kf = float(tv), float(kv)
             t_marker = ' ◀' if tf > kf else '  '
             k_marker = ' ◀' if kf > tf else '  '
+            if 'Overfit' in label or 'Time' in label:  # Mai mic = mai bine
+                t_marker = ' ◀' if tf < kf else '  '
+                k_marker = ' ◀' if kf < tf else '  '
             print(f'  {label:<25} {tv:>13.4f}{t_marker}  {kv:>9.4f}{k_marker}')
-        except (ValueError, TypeError):
+        except:
             print(f'  {label:<25} {str(tv):>14}  {str(kv):>10}')
 
-    print(sep)
     tree_wins = sum(1 for v in comp.values() if v == 'tree')
-    knn_wins  = sum(1 for v in comp.values() if v == 'knn')
+    knn_wins = sum(1 for v in comp.values() if v == 'knn')
     winner = 'Decision Tree 🌲' if tree_wins >= knn_wins else 'KNN 🔵'
-    print(f'  Castigator: {winner}  (Tree: {tree_wins}W / KNN: {knn_wins}W)')
-    print(sep)
+    print(f'{sep}\n  Castigator: {winner}  (Tree: {tree_wins}W / KNN: {knn_wins}W)\n{sep}')
 
 
 def main():
     args = parse_args()
 
-    logging.info('=' * 56)
-    logging.info('  ML Analysis — KNN vs Decision Tree')
-    logging.info('=' * 56)
-
-    # 1. Verificare fisiere
     missing = check_required_files(args.data, args.models)
     if missing:
         logging.error('Fisiere lipsa:')
-        for f in missing:
-            logging.error(f'  ✗ {f}')
-        logging.error('Asigura-te ca ai rulat tree_trainer.py si knn_trainer.py inainte.')
+        for f in missing: logging.error(f'  ✗ {f}')
+        logging.error('Ruleaza intai data_cleaner.py, apoi decisionTree_model.py si KNN_model.py')
         sys.exit(1)
 
-    # 2. Analiza
     logging.info('Pasul 1/3: Incarcare modele & calcul metrici...')
-    analyzer = ModelAnalyzer(
-        data_folder=args.data,
-        models_folder=args.models
-    )
+    analyzer = ModelAnalyzer(data_folder=args.data, models_folder=args.models)
     results = analyzer.run()
+    analyzer.save_json(os.path.join(args.out, 'analysis_results.json'))
 
-    # 3. Salveaza JSON
-    json_path = os.path.join(args.out, 'analysis_results.json')
-    analyzer.save_json(json_path)
-
-    # 4. Genereaza dashboard HTML
     logging.info('Pasul 2/3: Generare dashboard HTML...')
     report = ReportGenerator(results)
     html_path = report.save(os.path.join(args.out, 'dashboard.html'))
 
-    # 5. Rezumat terminal
     logging.info('Pasul 3/3: Rezumat final...')
     print_summary(results)
 
-    logging.info(f'Dashboard:  {os.path.abspath(html_path)}')
-    logging.info(f'JSON:       {os.path.abspath(json_path)}')
-
-    # 6. Deschide browserul
     if not args.no_browser:
-        abs_path = os.path.abspath(html_path)
-        webbrowser.open(f'file://{abs_path}')
-        logging.info('Dashboard deschis in browser.')
-
-    logging.info('Analiza completa!')
+        webbrowser.open(f'file://{os.path.abspath(html_path)}')
 
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     main()

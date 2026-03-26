@@ -1,0 +1,75 @@
+Feature,Importance
+daily_gaming_hours,0.5566938642708097
+sleep_hours,0.21247164918718606
+face_to_face_social_hours_weekly,0.13644724294508326
+gaming_platform_Mobile,0.049436535404805866
+primary_game_Final Fantasy XIV,0.04495070819211501
+age,0.0
+academic_work_performance_Poor,0.0
+academic_work_performance_Good,0.0
+academic_work_performance_Failing,0.0
+academic_work_performance_Excellent,0.0
+academic_work_performance_Below Average,0.0
+sleep_disruption_frequency_Sometimes,0.0
+sleep_disruption_frequency_Often,0.0
+sleep_disruption_frequency_Rarely,0.0
+mood_state_Depressed,0.0
+sleep_disruption_frequency_Never,0.0
+gaming_platform_PC,0.0
+gaming_platform_Multi-platform,0.0
+primary_game_World of Warcraft,0.0
+mood_state_Anxious,0.0
+mood_state_Excited,0.0
+mood_state_Euphoric,0.0
+primary_game_Valorant,0.0
+gaming_addiction_risk_level_Moderate,0.0
+gaming_addiction_risk_level_Low,0.0
+back_neck_pain_True,0.0
+eye_strain_True,0.0
+continued_despite_problems_True,0.0
+loss_of_other_interests_True,0.0
+withdrawal_symptoms_True,0.0
+mood_swing_frequency_Sometimes,0.0
+mood_swing_frequency_Rarely,0.0
+mood_swing_frequency_Often,0.0
+mood_swing_frequency_Never,0.0
+mood_state_Withdrawn,0.0
+mood_state_Restless,0.0
+mood_state_Normal,0.0
+mood_state_Irritable,0.0
+primary_game_Warzone,0.0
+primary_game_Skyrim,0.0
+primary_game_StarCraft II,0.0
+gender_Male,0.0
+game_genre_RPG,0.0
+game_genre_Mobile Games,0.0
+game_genre_MOBA,0.0
+game_genre_MMO,0.0
+game_genre_FPS,0.0
+gender_Other,0.0
+years_gaming,0.0
+primary_game_PUBG Mobile,0.0
+monthly_game_spending_usd,0.0
+social_isolation_score,0.0
+exercise_hours_weekly,0.0
+weight_change_kg,0.0
+work_productivity_score,0.0
+grades_gpa,0.0
+game_genre_Strategy,0.0
+primary_game_Apex Legends,0.0
+primary_game_CS:GO,0.0
+primary_game_Call of Duty,0.0
+primary_game_Candy Crush,0.0
+primary_game_Civilization VI,0.0
+primary_game_Clash of Clans,0.0
+primary_game_Cyberpunk 2077,0.0
+primary_game_Dota 2,0.0
+primary_game_Elden Ring,0.0
+primary_game_Elder Scrolls Online,0.0
+primary_game_Fortnite,0.0
+primary_game_Genshin Impact,0.0
+primary_game_League of Legends,0.0
+primary_game_Mobile Legends,0.0
+primary_game_Overwatch,0.0
+primary_game_PUBG,0.0
+gaming_addiction_risk_level_Severe,0.0

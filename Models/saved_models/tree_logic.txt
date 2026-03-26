@@ -1,0 +1,22 @@
+|--- daily_gaming_hours <= 0.10
+|   |--- sleep_hours <= 0.81
+|   |   |--- face_to_face_social_hours_weekly <= 0.98
+|   |   |   |--- class: 0
+|   |   |--- face_to_face_social_hours_weekly >  0.98
+|   |   |   |--- class: 3
+|   |--- sleep_hours >  0.81
+|   |   |--- face_to_face_social_hours_weekly <= 0.28
+|   |   |   |--- class: 3
+|   |   |--- face_to_face_social_hours_weekly >  0.28
+|   |   |   |--- class: 1
+|--- daily_gaming_hours >  0.10
+|   |--- gaming_platform_Mobile <= 0.54
+|   |   |--- primary_game_Final Fantasy XIV <= 2.04
+|   |   |   |--- class: 3
+|   |   |--- primary_game_Final Fantasy XIV >  2.04
+|   |   |   |--- class: 4
+|   |--- gaming_platform_Mobile >  0.54
+|   |   |--- face_to_face_social_hours_weekly <= -1.59
+|   |   |   |--- class: 4
+|   |   |--- face_to_face_social_hours_weekly >  -1.59
+|   |   |   |--- class: 4

@@ -11,11 +11,10 @@ from sklearn.metrics import classification_report
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 class KNNTrainer:
-    def __init__(self, data_folder='data_output/', results_folder='results/models/'):
-        self.data_folder = data_folder.rstrip('/')
-        self.results_folder = results_folder.rstrip('/')
+    def __init__(self, data_folder, results_folder):
+        self.data_folder = data_folder
+        self.results_folder = results_folder
         self.best_model = None
 
         if not os.path.exists(self.results_folder):
@@ -24,10 +23,8 @@ class KNNTrainer:
     def load_data(self):
         X_train = np.load(os.path.join(self.data_folder, 'X_train.npy'))
         y_train = np.load(os.path.join(self.data_folder, 'y_train.npy'))
-
         X_test = np.load(os.path.join(self.data_folder, 'X_test.npy'))
         y_test = np.load(os.path.join(self.data_folder, 'y_test.npy'))
-
         return X_train, y_train.ravel(), X_test, y_test.ravel()
 
     def train(self):
@@ -46,21 +43,15 @@ class KNNTrainer:
         }
 
         search = RandomizedSearchCV(
-            pipeline,
-            param_distributions=param_dist,
-            n_iter=20,
-            cv=5,
-            scoring='accuracy',
-            verbose=1,
-            n_jobs=-1,
-            random_state=42
+            pipeline, param_distributions=param_dist,
+            n_iter=20, cv=5, scoring='accuracy',
+            verbose=1, n_jobs=-1, random_state=42
         )
 
         search.fit(X_train, y_train)
         self.best_model = search.best_estimator_
 
         y_pred = self.best_model.predict(X_test)
-
         logging.info("Evaluare pe test set:")
         print(classification_report(y_test, y_pred))
 
@@ -68,14 +59,14 @@ class KNNTrainer:
         joblib.dump(search.best_params_, os.path.join(self.results_folder, 'knn_best_params.joblib'))
 
         logging.info(f"Best Params: {search.best_params_}")
-        logging.info(f"Best CV Score: {search.best_score_:.4f}")
-
         return self.best_model
 
-
 if __name__ == "__main__":
-    trainer = KNNTrainer(data_folder='data_output')
+    ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    data_dir = os.path.join(ROOT_DIR, 'data', 'processed')
+    models_dir = os.path.join(ROOT_DIR, 'Models', 'saved_models')
 
+    trainer = KNNTrainer(data_folder=data_dir, results_folder=models_dir)
     try:
         best_knn = trainer.train()
     except Exception as e:
