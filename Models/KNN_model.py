@@ -1,17 +1,22 @@
 import numpy as np
 import os
 import joblib
+import logging
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class KNNTrainer:
-    def _init_(self, data_folder='data_output/', results_folder='results/models/'):
+    def __init__(self, data_folder='data_output/', results_folder='results/models/'):
         self.data_folder = data_folder.rstrip('/')
         self.results_folder = results_folder.rstrip('/')
+        self.best_model = None
 
         if not os.path.exists(self.results_folder):
             os.makedirs(self.results_folder)
@@ -20,11 +25,13 @@ class KNNTrainer:
         X_train = np.load(os.path.join(self.data_folder, 'X_train.npy'))
         y_train = np.load(os.path.join(self.data_folder, 'y_train.npy'))
 
-        return X_train, y_train.ravel()
+        X_test = np.load(os.path.join(self.data_folder, 'X_test.npy'))
+        y_test = np.load(os.path.join(self.data_folder, 'y_test.npy'))
+
+        return X_train, y_train.ravel(), X_test, y_test.ravel()
 
     def train(self):
-        X_train, y_train = self.load_data()
-
+        X_train, y_train, X_test, y_test = self.load_data()
 
         pipeline = Pipeline([
             ('scaler', StandardScaler()),
@@ -47,24 +54,29 @@ class KNNTrainer:
             verbose=1,
             n_jobs=-1,
             random_state=42
-
         )
 
         search.fit(X_train, y_train)
-
         self.best_model = search.best_estimator_
 
-        joblib.dump(self.best_model, os.path.join(self.results_folder, 'knn_pipeline.joblib'))
-        joblib.dump(search.best_params_, os.path.join(self.results_folder, 'best_params.joblib'))
+        y_pred = self.best_model.predict(X_test)
 
+        logging.info("Evaluare pe test set:")
+        print(classification_report(y_test, y_pred))
+
+        joblib.dump(self.best_model, os.path.join(self.results_folder, 'knn_pipeline.joblib'))
+        joblib.dump(search.best_params_, os.path.join(self.results_folder, 'knn_best_params.joblib'))
+
+        logging.info(f"Best Params: {search.best_params_}")
+        logging.info(f"Best CV Score: {search.best_score_:.4f}")
 
         return self.best_model
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     trainer = KNNTrainer(data_folder='data_output')
 
     try:
         best_knn = trainer.train()
     except Exception as e:
-        print(f":{e}")
+        logging.error(f"Eroare la antrenare: {e}")
