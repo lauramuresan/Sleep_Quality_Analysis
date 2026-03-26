@@ -47,6 +47,7 @@ class KNNTrainer:
             verbose=1,
             n_jobs=-1,
             random_state=42
+
         )
 
         search.fit(X_train, y_train)
