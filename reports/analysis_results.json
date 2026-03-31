@@ -8,7 +8,7 @@
     "recall_macro": 0.3254,
     "f1_macro": 0.3245,
     "auc_roc": null,
-    "predict_time_ms": 0.348,
+    "predict_time_ms": 0.39,
     "confusion_matrix": [
       [
         29,
@@ -150,7 +150,7 @@
     "recall_macro": 0.2809,
     "f1_macro": 0.2795,
     "auc_roc": null,
-    "predict_time_ms": 24.565,
+    "predict_time_ms": 24.497,
     "confusion_matrix": [
       [
         29,
