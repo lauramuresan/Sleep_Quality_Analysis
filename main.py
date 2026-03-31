@@ -18,7 +18,7 @@ def parse_args():
     ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
     parser = argparse.ArgumentParser(description='Analiza comparativa KNN vs Decision Tree')
 
-    # Rutele standard bazate pe structura ta
+
     parser.add_argument('--data', type=str, default=os.path.join(ROOT_DIR, 'data', 'processed'),
                         help='Folder date procesate')
     parser.add_argument('--models', type=str, default=os.path.join(ROOT_DIR, 'Models', 'saved_models'),
@@ -46,7 +46,7 @@ def check_required_files(data_folder, models_folder):
 def print_summary(results):
     t, k, comp, ds = results['tree'], results['knn'], results['comparison'], results['dataset']
     sep = '─' * 56
-    print(f'\n{sep}\n  📊  REZUMAT COMPARATIV — KNN vs Decision Tree\n{sep}')
+    print(f'\n{sep}\n  📊  RESULT — KNN vs Decision Tree\n{sep}')
     print(
         f'  Dataset: {ds["train_samples"]:,} train / {ds["test_samples"]:,} test / {ds["n_features"]} features / {ds["n_classes"]} clase\n{sep}')
     print(f'  {"Metrica":<25} {"Decision Tree":>14}  {"KNN":>10}\n  {"-" * 25} {"-" * 14}  {"-" * 10}')
@@ -66,7 +66,7 @@ def print_summary(results):
             tf, kf = float(tv), float(kv)
             t_marker = ' ◀' if tf > kf else '  '
             k_marker = ' ◀' if kf > tf else '  '
-            if 'Overfit' in label or 'Time' in label:  # Mai mic = mai bine
+            if 'Overfit' in label or 'Time' in label:
                 t_marker = ' ◀' if tf < kf else '  '
                 k_marker = ' ◀' if kf < tf else '  '
             print(f'  {label:<25} {tv:>13.4f}{t_marker}  {kv:>9.4f}{k_marker}')

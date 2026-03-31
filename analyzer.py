@@ -12,8 +12,6 @@ import time
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- ACEASTA ESTE REZOLVAREA ---
-# Un traducător care convertește tipurile Numpy în tipuri Python standard pentru JSON
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -23,7 +21,6 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return super(NumpyEncoder, self).default(obj)
-# -------------------------------
 
 class ModelAnalyzer:
     def __init__(self, data_folder, models_folder):
@@ -145,6 +142,5 @@ class ModelAnalyzer:
     def save_json(self, path):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, 'w', encoding='utf-8') as f:
-            # Folosim NumpyEncoder-ul pe care l-am creat sus
             json.dump(self.results, f, indent=2, ensure_ascii=False, cls=NumpyEncoder)
         logging.info(f"Rezultate salvate in: {path}")
