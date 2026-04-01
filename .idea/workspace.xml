@@ -4,26 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f6dc2aa4-27ca-4519-a340-9e637cb12b22" name="Changes" comment="debugged some files">
-      <change afterPath="$PROJECT_DIR$/Models/random_forest.py" afterDir="false" />
+    <list default="true" id="f6dc2aa4-27ca-4519-a340-9e637cb12b22" name="Changes" comment="changed hyperparameters of the models DT and KNN, added a new model : random forest">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/KNN_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Models/KNN_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/decisionTree_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Models/decisionTree_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/saved_models/feature_importance.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Models/saved_models/feature_importance.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/saved_models/knn_best_params.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/Models/saved_models/knn_best_params.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/saved_models/knn_pipeline.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/Models/saved_models/knn_pipeline.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/saved_models/tree_best_params.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/Models/saved_models/tree_best_params.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/saved_models/tree_logic.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Models/saved_models/tree_logic.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/saved_models/tree_model.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/Models/saved_models/tree_model.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/X_test.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/X_test.npy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/X_train.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/X_train.npy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/feature_names.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/feature_names.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/scaler.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/scaler.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/y_test.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/y_test.npy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/y_train.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/y_train.npy" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocessing/data_cleaner.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_cleaner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reports/analysis_results.json" beforeDir="false" afterPath="$PROJECT_DIR$/reports/analysis_results.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reports/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/reports/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,12 +29,22 @@
     &quot;assignee&quot;: &quot;lauramuresan&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/lauramuresan/Sleep_Quality_Analysis.git&quot;,
-    &quot;accountId&quot;: &quot;22fb0e80-c3be-410c-ad37-53c92ed8afb4&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/lauramuresan/Sleep_Quality_Analysis.git",
+    "accountId": "22fb0e80-c3be-410c-ad37-53c92ed8afb4"
+  },
+  "recentNewPullRequestHead": {
+    "server": {
+      "useHttp": false,
+      "host": "github.com",
+      "port": null,
+      "suffix": null
+    },
+    "owner": "lauramuresan",
+    "repository": "Sleep_Quality_Analysis"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -64,6 +57,7 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.KNN_model.executor": "Run",
+    "Python.analyzer.executor": "Run",
     "Python.data_cleaner.executor": "Run",
     "Python.decisionTree_model.executor": "Run",
     "Python.main.executor": "Run",
@@ -71,7 +65,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "lauraa",
+    "git-widget-placeholder": "#7 on lauraa",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -224,7 +218,7 @@
       <updated>1773771970782</updated>
       <workItem from="1773771971710" duration="349000" />
       <workItem from="1774558212075" duration="1784000" />
-      <workItem from="1774986028777" duration="2271000" />
+      <workItem from="1774986028777" duration="3762000" />
     </task>
     <task id="LOCAL-00001" summary="idk">
       <option name="closed" value="true" />
@@ -242,7 +236,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774558112106</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="changed hyperparameters of the models DT and KNN, added a new model : random forest">
+      <option name="closed" value="true" />
+      <created>1774988494909</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1774988494909</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -263,13 +265,15 @@
     <MESSAGE value="idk" />
     <MESSAGE value="added the raw data and changed something" />
     <MESSAGE value="debugged some files" />
-    <option name="LAST_COMMIT_MESSAGE" value="debugged some files" />
+    <MESSAGE value="changed hyperparameters of the models DT and KNN, added a new model : random forest" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed hyperparameters of the models DT and KNN, added a new model : random forest" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Sleep_Analysis$random_forest.coverage" NAME="random_forest Coverage Results" MODIFIED="1774988020137" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Models" />
     <SUITE FILE_PATH="coverage/Sleep_Analysis$main.coverage" NAME="main Coverage Results" MODIFIED="1774986081501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Sleep_Analysis$decisionTree_model.coverage" NAME="decisionTree_model Coverage Results" MODIFIED="1774987743482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Models" />
     <SUITE FILE_PATH="coverage/Sleep_Analysis$data_cleaner.coverage" NAME="data_cleaner Coverage Results" MODIFIED="1774987991669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocessing" />
+    <SUITE FILE_PATH="coverage/Sleep_Analysis$analyzer.coverage" NAME="analyzer Coverage Results" MODIFIED="1774988399703" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Sleep_Analysis$KNN_model.coverage" NAME="KNN_model Coverage Results" MODIFIED="1774987783060" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Models" />
   </component>
 </project>

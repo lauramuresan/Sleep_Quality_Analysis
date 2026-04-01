@@ -19,25 +19,18 @@ class GamingDataPreprocessor:
             os.makedirs(self.output_folder)
 
     def run_pipeline(self):
-        print("Începe preprocesarea... Transformăm în clasificare BINARĂ!")
         df = pd.read_csv(self.input_path)
-
-        # 1. Eliminăm coloanele inutile care încurcă modelul
         cols_to_drop = ['record_id', 'primary_game']
         df = df.drop(columns=[c for c in cols_to_drop if c in df.columns])
 
-        # 2. HACK-UL PENTRU ACURATEȚE URIAȘĂ (Binning)
-        # Grupăm cele 6 clase subiective în 2 categorii obiective
         sleep_mapping = {
-            'Excellent': 1, 'Good': 1, 'Fair': 1,  # Somn Bun / Decent
-            'Poor': 0, 'Very Poor': 0, 'Insomnia': 0  # Somn Problematic
+            'Excellent': 1, 'Good': 1, 'Fair': 1,
+            'Poor': 0, 'Very Poor': 0, 'Insomnia': 0
         }
 
         df['sleep_quality'] = df['sleep_quality'].map(sleep_mapping)
-
-        # Separăm X și y
         X = df.drop(columns=['sleep_quality'])
-        y = df['sleep_quality'].astype(int)  # Acum avem doar 0 și 1
+        y = df['sleep_quality'].astype(int)
 
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=42, stratify=y
@@ -46,7 +39,6 @@ class GamingDataPreprocessor:
         num_cols = X_train.select_dtypes(include=['number']).columns.tolist()
         cat_cols = X_train.select_dtypes(exclude=['number']).columns.tolist()
 
-        # Imputare
         if num_cols:
             X_train[num_cols] = self.num_imputer.fit_transform(X_train[num_cols])
             X_test[num_cols] = self.num_imputer.transform(X_test[num_cols])
@@ -55,16 +47,13 @@ class GamingDataPreprocessor:
             X_train[cat_cols] = self.cat_imputer.fit_transform(X_train[cat_cols].astype(object))
             X_test[cat_cols] = self.cat_imputer.transform(X_test[cat_cols].astype(object))
 
-        # One-Hot Encoding
         X_train = pd.get_dummies(X_train, columns=cat_cols, drop_first=True)
         X_test = pd.get_dummies(X_test, columns=cat_cols, drop_first=True)
         X_test = X_test.reindex(columns=X_train.columns, fill_value=0)
 
-        # Scalare
         X_train_scaled = self.scaler.fit_transform(X_train)
         X_test_scaled = self.scaler.transform(X_test)
 
-        # Salvare
         np.save(os.path.join(self.output_folder, 'X_train.npy'), X_train_scaled)
         np.save(os.path.join(self.output_folder, 'X_test.npy'), X_test_scaled)
         np.save(os.path.join(self.output_folder, 'y_train.npy'), y_train)
@@ -73,7 +62,6 @@ class GamingDataPreprocessor:
         joblib.dump(self.scaler, os.path.join(self.output_folder, 'scaler.joblib'))
         joblib.dump(X_train.columns.tolist(), os.path.join(self.output_folder, 'feature_names.joblib'))
 
-        print(f"✅ Preprocesare completă! Modelele vor prezice acum 0 (Slab) sau 1 (Bun).")
 
 
 if __name__ == "__main__":

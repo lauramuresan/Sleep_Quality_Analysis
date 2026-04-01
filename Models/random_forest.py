@@ -47,7 +47,7 @@ class RandomForestTrainer:
         acc = accuracy_score(y_test, y_pred)
 
         print(f"\n=========================================")
-        print(f"🏆 Accuracy pe test set (Random Forest): {acc * 100:.2f}%")
+        print(f" Accuracy pe test set: {acc * 100:.2f}%")
         print(f"=========================================\n")
 
         importance = pd.DataFrame({
